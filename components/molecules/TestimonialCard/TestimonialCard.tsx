@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 export interface TestimonialCardProps {
   quote: string;
   name: string;
@@ -52,7 +54,7 @@ export function TestimonialCard({
         {quote}
       </p>
       <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-        <img
+        <Image
           src={avatarSrc}
           alt={name}
           width={48}

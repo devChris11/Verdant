@@ -2,6 +2,7 @@
 
 import { motion } from "motion/react";
 import { Badge } from "@/components/atoms/Badge";
+import Image from "next/image";
 
 export interface BlogCardProps {
   coverSrc: string;
@@ -31,11 +32,13 @@ export function BlogCard({
         overflow: "hidden",
       }}
     >
-      <div style={{ height: 200, overflow: "hidden" }}>
-        <img
+      <div style={{ position: "relative", height: 200, overflow: "hidden" }}>
+        <Image
           src={coverSrc}
           alt={title}
-          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          fill
+          style={{ objectFit: "cover" }}
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
       </div>
       <div style={{ padding: 24 }}>
