@@ -7,6 +7,7 @@ const TESTIMONIALS_QUERY = groq`*[_type == "testimonial"] { _id, fullName, jobTi
 const PRICING_PLANS_QUERY = groq`*[_type == "pricingPlan"] { _id, priceHeading, chipText, price, features, ctaLabel, isPopular }`;
 const BLOG_POSTS_QUERY = groq`*[_type == "blogPost"] { _id, blogTitle, coverImage, tag, publishedAt, readTime, "blogSlug": blogSlug.current }`;
 
+export const revalidate = 0
 export default async function Home() {
 
   const testimonials = await client.fetch<TESTIMONIALS_QUERY_RESULT>(TESTIMONIALS_QUERY);
