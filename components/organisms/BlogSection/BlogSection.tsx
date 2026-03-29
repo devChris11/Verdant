@@ -2,13 +2,13 @@
 
 import { motion } from "motion/react";
 import { SectionLabel } from "@/components/atoms/SectionLabel";
-import { BlogCard } from "@/components/molecules/BlogCard";
+import { BlogCard, type BlogCardProps } from "@/components/molecules/BlogCard";
+import type { BlogPostData } from "@/components/providers/ModalProvider";
+import { urlFor } from "@/sanity/lib/image";
 
-export interface BlogSectionProps {
-  onOpenModal: () => void;
-}
+type HardcodedPost = Omit<BlogCardProps, "onReadMore">;
 
-const posts = [
+const hardcodedPosts: HardcodedPost[] = [
   {
     coverSrc:
       "https://ik.imagekit.io/ChristoFernando/Case%20Study%20Projects/Verdant/blog-cover-1.png",
@@ -35,7 +35,55 @@ const posts = [
   },
 ];
 
-export function BlogSection({ onOpenModal }: BlogSectionProps) {
+const coverFallback = hardcodedPosts[0].coverSrc;
+
+function formatPublishedDate(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+function isSanityPost(
+  item: BlogPostData | HardcodedPost,
+): item is BlogPostData {
+  return "_id" in item;
+}
+
+function toBlogCardProps(item: BlogPostData | HardcodedPost): BlogCardProps {
+  if (isSanityPost(item)) {
+    const img = item.coverImage;
+    const hasImage = Boolean(img?.asset?._ref);
+    return {
+      coverSrc:
+        hasImage && img ? urlFor(img).width(800).height(450).url() : coverFallback,
+      tag: item.tag,
+      title: item.blogTitle,
+      date: formatPublishedDate(item.publishedAt),
+      readTime: item.readTime,
+    };
+  }
+  return {
+    coverSrc: item.coverSrc,
+    tag: item.tag,
+    title: item.title,
+    date: item.date,
+    readTime: item.readTime,
+  };
+}
+
+export interface BlogSectionProps {
+  onOpenModal: () => void;
+  blogPosts: BlogPostData[];
+}
+
+export function BlogSection({ onOpenModal, blogPosts }: BlogSectionProps) {
+  const items: (BlogPostData | HardcodedPost)[] =
+    blogPosts.length > 0 ? blogPosts : hardcodedPosts;
+
   return (
     <section className="py-24" style={{ backgroundColor: "var(--bg)" }}>
       <div className="max-w-7xl mx-auto px-6">
@@ -65,24 +113,20 @@ export function BlogSection({ onOpenModal }: BlogSectionProps) {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {posts.map((post, index) => (
-            <motion.div
-              key={post.title}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ delay: index * 0.1 }}
-            >
-              <BlogCard
-                coverSrc={post.coverSrc}
-                tag={post.tag}
-                title={post.title}
-                date={post.date}
-                readTime={post.readTime}
-                onReadMore={onOpenModal}
-              />
-            </motion.div>
-          ))}
+          {items.map((item, index) => {
+            const card = toBlogCardProps(item);
+            return (
+              <motion.div
+                key={isSanityPost(item) ? item._id : item.title}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <BlogCard {...card} onReadMore={onOpenModal} />
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </section>

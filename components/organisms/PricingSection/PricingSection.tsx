@@ -2,40 +2,89 @@
 
 import { motion } from "motion/react";
 import { SectionLabel } from "@/components/atoms/SectionLabel";
-import { PricingCard } from "@/components/molecules/PricingCard";
+import {
+  PricingCard,
+  type PricingCardProps,
+} from "@/components/molecules/PricingCard";
+import type { PricingPlanData } from "@/components/providers/ModalProvider";
 
-export interface PricingSectionProps {
-  onOpenModal: () => void;
-}
+type HardcodedPlan = Omit<PricingCardProps, "onCtaClick">;
 
-const plans = [
+const hardcodedPlans: HardcodedPlan[] = [
   {
     plan: "Hobby",
     price: "Free",
     description: "",
     features: ["1 service", "5GB storage", "Community support"],
     ctaLabel: "Get started free",
-    isPopular: false as boolean,
+    isPopular: false,
   },
   {
     plan: "Pro",
     price: "$99/mo",
     description: "",
-    features: ["Unlimited services", "500GB storage", "Email support", "99.9% SLA"],
+    features: [
+      "Unlimited services",
+      "500GB storage",
+      "Email support",
+      "99.9% SLA",
+    ],
     ctaLabel: "Start free trial",
-    isPopular: true as boolean,
+    isPopular: true,
   },
   {
     plan: "Enterprise",
     price: "Custom",
     description: "",
-    features: ["Dedicated clusters", "Custom SLA", "SAML SSO", "Dedicated support"],
+    features: [
+      "Dedicated clusters",
+      "Custom SLA",
+      "SAML SSO",
+      "Dedicated support",
+    ],
     ctaLabel: "Contact sales",
-    isPopular: false as boolean,
+    isPopular: false,
   },
 ];
 
-export function PricingSection({ onOpenModal }: PricingSectionProps) {
+function isSanityPlan(
+  item: PricingPlanData | HardcodedPlan,
+): item is PricingPlanData {
+  return "_id" in item;
+}
+
+function toPricingCardProps(
+  item: PricingPlanData | HardcodedPlan,
+): PricingCardProps {
+  if (isSanityPlan(item)) {
+    return {
+      plan: item.priceHeading,
+      price: item.price,
+      description: item.chipText?.trim() ?? "",
+      features: item.features ?? [],
+      ctaLabel: item.ctaLabel,
+      isPopular: Boolean(item.isPopular),
+    };
+  }
+  return {
+    plan: item.plan,
+    price: item.price,
+    description: item.description,
+    features: item.features,
+    ctaLabel: item.ctaLabel,
+    isPopular: item.isPopular,
+  };
+}
+
+export interface PricingSectionProps {
+  onOpenModal: () => void;
+  pricingPlans: PricingPlanData[];
+}
+
+export function PricingSection({ onOpenModal, pricingPlans }: PricingSectionProps) {
+  const items: (PricingPlanData | HardcodedPlan)[] =
+    pricingPlans.length > 0 ? pricingPlans : hardcodedPlans;
+
   return (
     <section className="py-24" style={{ backgroundColor: "var(--bg)" }}>
       <div className="max-w-7xl mx-auto px-6">
@@ -73,30 +122,26 @@ export function PricingSection({ onOpenModal }: PricingSectionProps) {
               color: "var(--muted)",
             }}
           >
-            No upfront costs. Pay only for what you use, with predictable pricing and no egress fees.
+            No upfront costs. Pay only for what you use, with predictable pricing
+            and no egress fees.
           </motion.p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {plans.map((plan, index) => (
-            <motion.div
-              key={plan.plan}
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ delay: index * 0.1 }}
-            >
-              <PricingCard
-                plan={plan.plan}
-                price={plan.price}
-                description={plan.description}
-                features={plan.features}
-                ctaLabel={plan.ctaLabel}
-                isPopular={plan.isPopular}
-                onCtaClick={onOpenModal}
-              />
-            </motion.div>
-          ))}
+          {items.map((item, index) => {
+            const card = toPricingCardProps(item);
+            return (
+              <motion.div
+                key={isSanityPlan(item) ? item._id : item.plan}
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <PricingCard {...card} onCtaClick={onOpenModal} />
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </section>
