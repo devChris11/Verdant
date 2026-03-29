@@ -15,7 +15,7 @@ const mockSanityPosts: BLOG_POSTS_QUERY_RESULT = [
       _type: "image",
       asset: {
         _type: "reference",
-        _ref: "image-storybook-placeholder",
+        _ref: "image-storybookplaceholder-1200x800-jpg", // syntactic Sanity asset id for urlFor in Storybook
       },
     },
   },
