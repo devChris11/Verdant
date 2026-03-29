@@ -1,36 +1,17 @@
-"use client";
+import { groq } from "next-sanity";
+import { client } from "@/sanity/lib/client";
+import type { TESTIMONIALS_QUERY_RESULT, PRICING_PLANS_QUERY_RESULT, BLOG_POSTS_QUERY_RESULT } from "@/sanity.types";
+import { ModalProvider} from "@/components/providers/ModalProvider";
 
-import { useState } from "react";
-import { Navbar } from "@/components/organisms/Navbar";
-import { HeroSection } from "@/components/organisms/HeroSection";
-import { LogoStrip } from "@/components/organisms/LogoStrip";
-import { FeaturesSection } from "@/components/organisms/FeaturesSection";
-import { HowItWorksSection } from "@/components/organisms/HowItWorksSection";
-import { TestimonialsSection } from "@/components/organisms/TestimonialsSection";
-import { PricingSection } from "@/components/organisms/PricingSection";
-import { BlogSection } from "@/components/organisms/BlogSection";
-import { CTABanner } from "@/components/organisms/CTABanner";
-import { Footer } from "@/components/organisms/Footer";
-import { Modal } from "@/components/molecules/Modal";
+const TESTIMONIALS_QUERY = groq`*[_type == "testimonial"] { _id, fullName, jobTitle, avatar, quote }`;
+const PRICING_PLANS_QUERY = groq`*[_type == "pricingPlan"] { _id, priceHeading, chipText, price, features, ctaLabel, isPopular }`;
+const BLOG_POSTS_QUERY = groq`*[_type == "blogPost"] { _id, blogTitle, coverImage, tag, publishedAt, readTime, "blogSlug": blogSlug.current }`;
 
-export default function Home() {
-  const [isModalOpen, setModalOpen] = useState(false);
-  const openModal = () => setModalOpen(true);
-  const closeModal = () => setModalOpen(false);
+export default async function Home() {
 
-  return (
-    <main>
-      <Navbar onOpenModal={openModal} />
-      <HeroSection onOpenModal={openModal} />
-      <LogoStrip />
-      <FeaturesSection />
-      <HowItWorksSection onOpenModal={openModal} />
-      <TestimonialsSection onOpenModal={openModal} />
-      <PricingSection onOpenModal={openModal} />
-      <BlogSection onOpenModal={openModal} />
-      <CTABanner onOpenModal={openModal} />
-      <Footer onOpenModal={openModal} />
-      <Modal isOpen={isModalOpen} onClose={closeModal} />
-    </main>
-  );
+  const testimonials = await client.fetch<TESTIMONIALS_QUERY_RESULT>(TESTIMONIALS_QUERY);
+  const pricingPlans = await client.fetch<PRICING_PLANS_QUERY_RESULT>(PRICING_PLANS_QUERY);
+  const blogPosts = await client.fetch<BLOG_POSTS_QUERY_RESULT>(BLOG_POSTS_QUERY);
+
+  return <ModalProvider testimonials={testimonials} pricingPlans={pricingPlans} blogPosts={blogPosts} />;
 }
