@@ -27,6 +27,15 @@ interface GrainientProps {
   color2?: string;
   color3?: string;
   className?: string;
+  /** e.g. "200px" — start rendering slightly before entering viewport */
+  intersectionRootMargin?: string;
+}
+
+function elementIntersectsViewport(el: HTMLElement): boolean {
+  const r = el.getBoundingClientRect();
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  return r.bottom > 0 && r.right > 0 && r.left < vw && r.top < vh;
 }
 
 const hexToRgb = (hex: string): [number, number, number] => {
@@ -144,6 +153,7 @@ export function Grainient({
   color2 = "#1a3d2a",
   color3 = "#080D08",
   className = "",
+  intersectionRootMargin = "0px",
 }: GrainientProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -214,16 +224,59 @@ export function Grainient({
     setSize();
 
     let raf = 0;
-    const t0 = performance.now();
-    const loop = (t: number) => {
-      (program.uniforms.iTime as { value: number }).value = (t - t0) * 0.001;
+    let accumulatedTime = 0;
+    let lastFrameTime = performance.now();
+
+    const loop = (now: number) => {
+      const dt = (now - lastFrameTime) * 0.001;
+      lastFrameTime = now;
+      accumulatedTime += dt;
+      (program.uniforms.iTime as { value: number }).value = accumulatedTime;
       renderer.render({ scene: mesh });
       raf = requestAnimationFrame(loop);
     };
-    raf = requestAnimationFrame(loop);
+
+    const stopLoop = () => {
+      if (raf) cancelAnimationFrame(raf);
+      raf = 0;
+    };
+
+    const startLoop = () => {
+      if (raf) return;
+      lastFrameTime = performance.now();
+      raf = requestAnimationFrame(loop);
+    };
+
+    let inViewport = elementIntersectsViewport(container);
+    let pageVisible = !document.hidden;
+
+    const syncLoop = () => {
+      if (inViewport && pageVisible) startLoop();
+      else stopLoop();
+    };
+
+    syncLoop();
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        const e = entries[0];
+        inViewport = e?.isIntersecting ?? false;
+        syncLoop();
+      },
+      { root: null, rootMargin: intersectionRootMargin, threshold: 0 },
+    );
+    io.observe(container);
+
+    const onVisibility = () => {
+      pageVisible = !document.hidden;
+      syncLoop();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
 
     return () => {
-      cancelAnimationFrame(raf);
+      stopLoop();
+      io.disconnect();
+      document.removeEventListener("visibilitychange", onVisibility);
       ro.disconnect();
       try {
         container.removeChild(canvas);
@@ -254,6 +307,7 @@ export function Grainient({
     color1,
     color2,
     color3,
+    intersectionRootMargin,
   ]);
 
   return (
