@@ -1,8 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import type { PricingPlanData } from "@/components/providers/ModalProvider";
+import type { PRICING_PLANS_QUERY_RESULT } from "@/sanity.types";
 import { PricingSection } from "./PricingSection";
 
-const mockSanityPlans: PricingPlanData[] = [
+/** Matches `PRICING_PLANS_QUERY_RESULT` / GROQ projection used in `app/page.tsx`. */
+const mockSanityPlans: PRICING_PLANS_QUERY_RESULT = [
   {
     _id: "story-plan-1",
     priceHeading: "Starter",
@@ -15,10 +16,20 @@ const mockSanityPlans: PricingPlanData[] = [
   {
     _id: "story-plan-2",
     priceHeading: "Growth",
+    chipText: null,
     price: "$99/mo",
     features: ["Unlimited services", "Priority support"],
     ctaLabel: "Start trial",
     isPopular: true,
+  },
+  {
+    _id: "story-plan-3",
+    priceHeading: "Enterprise",
+    chipText: "Volume pricing",
+    price: "Custom",
+    features: null,
+    ctaLabel: "Contact sales",
+    isPopular: false,
   },
 ];
 
@@ -29,15 +40,17 @@ const meta = {
   tags: ["autodocs"],
   args: {
     onOpenModal: () => {},
-    pricingPlans: [] as PricingPlanData[],
+    pricingPlans: [] as PRICING_PLANS_QUERY_RESULT,
   },
 } satisfies Meta<typeof PricingSection>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+/** Empty array → hardcoded Hobby / Pro / Enterprise cards. */
 export const Default: Story = {};
 
+/** Non-empty → same mapping as production (`toPricingCardProps`). */
 export const FromSanity: Story = {
   args: {
     pricingPlans: mockSanityPlans,

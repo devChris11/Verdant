@@ -1,8 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import type { BlogPostData } from "@/components/providers/ModalProvider";
+import type { BLOG_POSTS_QUERY_RESULT } from "@/sanity.types";
 import { BlogSection } from "./BlogSection";
 
-const mockSanityPosts: BlogPostData[] = [
+/** Matches `BLOG_POSTS_QUERY_RESULT` / GROQ projection used in `app/page.tsx`. */
+const mockSanityPosts: BLOG_POSTS_QUERY_RESULT = [
   {
     _id: "story-post-1",
     blogTitle: "Shipping faster with a CMS-backed marketing site",
@@ -25,6 +26,7 @@ const mockSanityPosts: BlogPostData[] = [
     tag: "Notes",
     publishedAt: "2025-05-01T08:30:00.000Z",
     readTime: "2 min read",
+    coverImage: null,
   },
 ];
 
@@ -35,15 +37,17 @@ const meta = {
   tags: ["autodocs"],
   args: {
     onOpenModal: () => {},
-    blogPosts: [] as BlogPostData[],
+    blogPosts: [] as BLOG_POSTS_QUERY_RESULT,
   },
 } satisfies Meta<typeof BlogSection>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+/** Empty array → hardcoded ImageKit posts. */
 export const Default: Story = {};
 
+/** Non-empty → `urlFor` / `formatPublishedDate` / cover fallback like production. */
 export const FromSanity: Story = {
   args: {
     blogPosts: mockSanityPosts,

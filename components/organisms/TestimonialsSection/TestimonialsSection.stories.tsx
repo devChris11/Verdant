@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import type { TestimonialData } from "@/components/providers/ModalProvider";
+import type { TESTIMONIALS_QUERY_RESULT } from "@/sanity.types";
 import { TestimonialsSection } from "./TestimonialsSection";
 
-const mockSanityTestimonials: TestimonialData[] = [
+const mockSanityTestimonials: TESTIMONIALS_QUERY_RESULT = [
   {
     _id: "story-testimonial-1",
     fullName: "Jordan Lee",
@@ -23,6 +23,7 @@ const mockSanityTestimonials: TestimonialData[] = [
     jobTitle: "SRE, Contoso",
     quote:
       "When avatar is omitted in Sanity, the section uses the same fallback image as the hardcoded cards.",
+    avatar: null,
   },
 ];
 
@@ -33,7 +34,7 @@ const meta = {
   tags: ["autodocs"],
   args: {
     onOpenModal: () => {},
-    testimonials: [],
+    testimonials: [] as TESTIMONIALS_QUERY_RESULT,
   },
 } satisfies Meta<typeof TestimonialsSection>;
 

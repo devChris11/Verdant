@@ -6,8 +6,10 @@ import {
   TestimonialCard,
   type TestimonialCardProps,
 } from "@/components/molecules/TestimonialCard";
-import { TestimonialData } from "@/components/providers/ModalProvider";
+import type { TESTIMONIALS_QUERY_RESULT } from "@/sanity.types";
 import { urlFor } from "@/sanity/lib/image";
+
+type SanityTestimonial = TESTIMONIALS_QUERY_RESULT[number];
 
 type HardcodedTestimonial = {
   avatarSrc: string;
@@ -39,21 +41,21 @@ const hardcodedTestimonials: HardcodedTestimonial[] = [
 const sanityAvatarFallback = hardcodedTestimonials[0].avatarSrc;
 
 function isSanityTestimonial(
-  item: TestimonialData | HardcodedTestimonial,
-): item is TestimonialData {
+  item: SanityTestimonial | HardcodedTestimonial,
+): item is SanityTestimonial {
   return "_id" in item;
 }
 
 function toTestimonialCardProps(
-  item: TestimonialData | HardcodedTestimonial,
+  item: SanityTestimonial | HardcodedTestimonial,
 ): TestimonialCardProps {
   if (isSanityTestimonial(item)) {
     const avatar = item.avatar;
     const hasImage = Boolean(avatar?.asset?._ref);
     return {
-      quote: item.quote,
-      name: item.fullName,
-      title: item.jobTitle,
+      quote: item.quote ?? "",
+      name: item.fullName ?? "",
+      title: item.jobTitle ?? "",
       avatarSrc:
         hasImage && avatar
           ? urlFor(avatar).width(96).height(96).url()
@@ -70,14 +72,14 @@ function toTestimonialCardProps(
 
 export interface TestimonialsSectionProps {
   onOpenModal: () => void;
-  testimonials: TestimonialData[];
+  testimonials: TESTIMONIALS_QUERY_RESULT;
 }
 
 export function TestimonialsSection({
   onOpenModal,
   testimonials,
 }: TestimonialsSectionProps) {
-  const items: (TestimonialData | HardcodedTestimonial)[] =
+  const items: (SanityTestimonial | HardcodedTestimonial)[] =
     testimonials.length > 0 ? testimonials : hardcodedTestimonials;
 
   return (

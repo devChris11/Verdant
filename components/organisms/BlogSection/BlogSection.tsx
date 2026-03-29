@@ -3,8 +3,10 @@
 import { motion } from "motion/react";
 import { SectionLabel } from "@/components/atoms/SectionLabel";
 import { BlogCard, type BlogCardProps } from "@/components/molecules/BlogCard";
-import type { BlogPostData } from "@/components/providers/ModalProvider";
+import type { BLOG_POSTS_QUERY_RESULT } from "@/sanity.types";
 import { urlFor } from "@/sanity/lib/image";
+
+type SanityBlogPost = BLOG_POSTS_QUERY_RESULT[number];
 
 type HardcodedPost = Omit<BlogCardProps, "onReadMore">;
 
@@ -48,22 +50,22 @@ function formatPublishedDate(iso: string): string {
 }
 
 function isSanityPost(
-  item: BlogPostData | HardcodedPost,
-): item is BlogPostData {
+  item: SanityBlogPost | HardcodedPost,
+): item is SanityBlogPost {
   return "_id" in item;
 }
 
-function toBlogCardProps(item: BlogPostData | HardcodedPost): BlogCardProps {
+function toBlogCardProps(item: SanityBlogPost | HardcodedPost): BlogCardProps {
   if (isSanityPost(item)) {
     const img = item.coverImage;
     const hasImage = Boolean(img?.asset?._ref);
     return {
       coverSrc:
         hasImage && img ? urlFor(img).width(800).height(450).url() : coverFallback,
-      tag: item.tag,
-      title: item.blogTitle,
-      date: formatPublishedDate(item.publishedAt),
-      readTime: item.readTime,
+      tag: item.tag ?? "",
+      title: item.blogTitle ?? "",
+      date: formatPublishedDate(item.publishedAt ?? ""),
+      readTime: item.readTime ?? "",
     };
   }
   return {
@@ -77,11 +79,11 @@ function toBlogCardProps(item: BlogPostData | HardcodedPost): BlogCardProps {
 
 export interface BlogSectionProps {
   onOpenModal: () => void;
-  blogPosts: BlogPostData[];
+  blogPosts: BLOG_POSTS_QUERY_RESULT;
 }
 
 export function BlogSection({ onOpenModal, blogPosts }: BlogSectionProps) {
-  const items: (BlogPostData | HardcodedPost)[] =
+  const items: (SanityBlogPost | HardcodedPost)[] =
     blogPosts.length > 0 ? blogPosts : hardcodedPosts;
 
   return (

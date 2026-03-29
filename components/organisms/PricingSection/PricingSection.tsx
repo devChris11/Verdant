@@ -6,7 +6,9 @@ import {
   PricingCard,
   type PricingCardProps,
 } from "@/components/molecules/PricingCard";
-import type { PricingPlanData } from "@/components/providers/ModalProvider";
+import type { PRICING_PLANS_QUERY_RESULT } from "@/sanity.types"; 
+
+type SanityPricingPlan = PRICING_PLANS_QUERY_RESULT[number];
 
 type HardcodedPlan = Omit<PricingCardProps, "onCtaClick">;
 
@@ -48,21 +50,21 @@ const hardcodedPlans: HardcodedPlan[] = [
 ];
 
 function isSanityPlan(
-  item: PricingPlanData | HardcodedPlan,
-): item is PricingPlanData {
+  item: SanityPricingPlan | HardcodedPlan,
+): item is SanityPricingPlan {
   return "_id" in item;
 }
 
 function toPricingCardProps(
-  item: PricingPlanData | HardcodedPlan,
+  item: SanityPricingPlan | HardcodedPlan,
 ): PricingCardProps {
   if (isSanityPlan(item)) {
     return {
-      plan: item.priceHeading,
-      price: item.price,
+      plan: item.priceHeading ?? "",
+      price: item.price ?? "",
       description: item.chipText?.trim() ?? "",
       features: item.features ?? [],
-      ctaLabel: item.ctaLabel,
+      ctaLabel: item.ctaLabel ?? "",
       isPopular: Boolean(item.isPopular),
     };
   }
@@ -78,11 +80,11 @@ function toPricingCardProps(
 
 export interface PricingSectionProps {
   onOpenModal: () => void;
-  pricingPlans: PricingPlanData[];
+  pricingPlans: PRICING_PLANS_QUERY_RESULT;
 }
 
 export function PricingSection({ onOpenModal, pricingPlans }: PricingSectionProps) {
-  const items: (PricingPlanData | HardcodedPlan)[] =
+  const items: (SanityPricingPlan | HardcodedPlan)[] =
     pricingPlans.length > 0 ? pricingPlans : hardcodedPlans;
 
   return (
