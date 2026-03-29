@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "motion/react";
 import { Badge } from "@/components/atoms/Badge";
 import { Button } from "@/components/atoms/Button";
+import { Grainient } from "@/components/atoms/Grainient";
 
 export interface HeroSectionProps {
   onOpenModal: () => void;
@@ -33,11 +34,27 @@ export function HeroSection({ onOpenModal }: HeroSectionProps) {
 
   return (
     <section className="min-h-screen relative overflow-hidden">
-      <div
-        id="threads-bg"
-        className="absolute inset-0 -z-10"
-        style={{ background: "var(--bg)" }}
-      />
+      <div className="absolute inset-0 -z-10">
+        <Grainient
+          color1="#0A0F0A"
+          color2="#1a3d2a"
+          color3="#080D08"
+          timeSpeed={1.0}
+          warpStrength={0.6}
+          warpFrequency={3.5}
+          warpSpeed={1.2}
+          warpAmplitude={70.0}
+          grainAmount={0.08}
+          grainScale={2.0}
+          grainAnimated={false}
+          contrast={1.2}
+          saturation={0.7}
+          zoom={0.85}
+          colorBalance={-0.15}
+          blendSoftness={0.12}
+          rotationAmount={350.0}
+        />
+      </div>
       <div
         className="absolute inset-0 -z-10"
         style={{
