@@ -10,9 +10,11 @@ const BLOG_POSTS_QUERY = groq`*[_type == "blogPost"] { _id, blogTitle, coverImag
 export const revalidate = 0
 export default async function Home() {
 
-  const testimonials = await client.fetch<TESTIMONIALS_QUERY_RESULT>(TESTIMONIALS_QUERY);
-  const pricingPlans = await client.fetch<PRICING_PLANS_QUERY_RESULT>(PRICING_PLANS_QUERY);
-  const blogPosts = await client.fetch<BLOG_POSTS_QUERY_RESULT>(BLOG_POSTS_QUERY);
+  const [testimonials, pricingPlans, blogPosts] = await Promise.all([
+    client.fetch<TESTIMONIALS_QUERY_RESULT>(TESTIMONIALS_QUERY),
+    client.fetch<PRICING_PLANS_QUERY_RESULT>(PRICING_PLANS_QUERY),
+    client.fetch<BLOG_POSTS_QUERY_RESULT>(BLOG_POSTS_QUERY),
+  ])
 
   return <ModalProvider testimonials={testimonials} pricingPlans={pricingPlans} blogPosts={blogPosts} />;
 }
