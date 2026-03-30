@@ -134,3 +134,11 @@ npm run typegen
 ├── sanity.types.ts                   # TypeGen output — do not edit manually
 └── next.config.ts                    # remotePatterns for Sanity CDN
 ```
+
+## TypeGen pipeline
+
+`schema.json` and `sanity.types.ts` are both committed intentionally.
+`schema.json` is the intermediate artefact produced by `sanity schema extract`.
+`sanity.types.ts` is the final generated output — TypeScript types derived
+from schemas and GROQ query projections. Committing both shows the full
+TypeGen pipeline is configured and types are in sync with the content model.
